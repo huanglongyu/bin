@@ -1,20 +1,60 @@
 #!/bin/sh
 
-PUSH_PRIV_APP_CMD="adb push $1 system/priv-app"
+arg1=$1
+needReboot=1
+targetPush=${arg1##*/}
+target=`echo ${targetPush} | awk -F"." '{print $1}'`
+echo "\n"
+echo "--------start push : ${targetPush}---------"
 
-if [ "`echo $1 | grep -ioE priv-app`" = "priv-app" ];then
-  arg1=$1
-  targetApk=${arg1##*/}
-  echo "\n\n"
-  echo "---------${targetApk}---------"
+##########  judge  priv-app  ########
+if [ "`echo $1 | grep -oE system/priv-app`" = "system/priv-app" ];then
+  tempVar=`adb shell ls system/priv-app| grep -o ${targetPush}`
+  tempLength=${#tempVar}
+  if [ ${tempLength} -eq 0 ] ;then
+    echo "--------target device has the dir--------"
+    PUSH="adb push $1 system/priv-app/${target}"
+  else
+    echo "---------target device has not the dir---------"
+    PUSH="adb push $1 system/priv-app"
+  fi
 
-  if ${PUSH_PRIV_APP_CMD};then
-    echo "push succeed"
-  elif adb root;then
+##########  judge  framework  ########
+elif [ "`echo $1 | grep -oE system/framework`" = "system/framework" ];then
+    PUSH="adb push $1 system/framework"
+    needReboot=0
+
+##########  judge  app  ########
+elif [ "`echo $1 | grep -oE system/app`" = "system/app" ];then
+  tempVar=`adb shell ls system/app| grep -o ${targetPush}`
+  tempLength=${#tempVar}
+  if [ ${tempLength} -eq 0 ] ;then
+    echo "--------target device has the dir--------"
+    PUSH="adb push $1 system/app/${target}"
+  else
+    echo "---------target device has not the dir---------"
+    PUSH="adb push $1 system/app"
+  fi
+else
+    echo "---------had no rule to push ,exit---------"
+    exit 1;
+fi
+
+echo "--------start push--------"
+
+##########  do the push action  ########
+if ${PUSH};then
+    echo "--------push succeed--------"
+elif adb root;then
     adb wait-for-device
     adb remount
-    ${PUSH_PRIV_APP_CMD}
-  else
-    echo "can not root"
-  fi
+    ${PUSH}
+    echo "--------push succeed--------"
+else
+    echo "--------can not root--------"
+fi
+
+if [ ${needReboot} -eq 0 ];then
+    echo "--------rebootfaking--------"
+    rebootfake
 fi
