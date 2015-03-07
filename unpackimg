@@ -1,0 +1,64 @@
+#!/bin/bash
+
+echo "InputFile : ${1}"
+
+####################################
+#                                  #
+#TODO:to judge the img not depends #
+#      on filename                 #
+#                                  #
+####################################
+
+# below expressions annotated needs help #
+#if [ "${1}" != 'img\$' ] ;then
+#if [[ "${1}" =~ \.img$ ]] ;then
+if [ "`echo ${1} | grep -o "\.img$"`" != ".img"  ] ;then
+    echo -e "\n"
+    echo "the file is not a img, exit"
+    echo "---------erro---------"
+    #rm ${1}.back 2>/dev/null
+    exit 1;
+fi
+
+unpackDir=`echo ${1##*/} | awk -F. '{print $1}'`
+outputDir=
+currentPath=`pwd`
+rawImg=${currentPath}/`echo ${1##*/}`.raw
+
+##### first backup the img #####
+cp -f ${1} ${currentPath}/`echo ${1##*/}`.back 2>/dev/null
+
+if [ -d ${unpackDir} ];then
+    echo "already exit the ${unpackDir} dir,make ${unpackDir}.back instead "
+    sudo umount ${unpackDir}.back 2>/dev/null
+    sudo rm -rf ${unpackDir}.back 2>/dev/null
+    sudo umount ${unpackDir} 2>/dev/null
+    sudo rm ${rawImg} 2>/dev/null
+    sudo mkdir ${unpackDir}.back
+    outputDir=${unpackDir}.back
+else
+    echo "make dir : ${unpackDir}"
+    mkdir ${unpackDir}
+    outputDir=${unpackDir}
+fi
+
+cmd="simg2img ${1} ${rawImg}"
+if ${cmd} ;then
+    sudo mount -t ext4 ${rawImg} ${outputDir}
+    sudo chown -R ${USER}:${USER} ${outputDir}
+else
+    echo -e "\n"
+    echo "exe simg2img failed,exit"
+    echo "---------erro---------"
+    exit 1;
+fi
+
+#simg2img ${1} ${rawImg}
+#result=`echo $?`
+#if [ ${result} -eq 0 ];then
+#    sudo mount -t ext4 ${rawImg} ${outputDir}
+#fi
+
+echo -e "\n"
+echo "OutputDir : ${outputDir}"
+echo "---------success---------"
