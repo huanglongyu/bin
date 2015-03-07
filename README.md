@@ -29,5 +29,5 @@ output :
 * the back up full-path.img
 * the img after use simg2img
 
-BTW : this do not support for recovery/boot.img
+BTW : this do not support for recovery/boot.img and needs root permission
 
