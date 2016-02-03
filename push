@@ -41,20 +41,40 @@ else
 fi
 
 echo "--------start push--------"
+echo "--------cmd : ${PUSH}--------"
 
 ##########  do the push action  ########
 if ${PUSH};then
     echo "--------push succeed--------"
-elif adb root;then
+#elif adb root;then
+#    echo "a!!!!!!!!!!!!"
+#    adb wait-for-device
+#    adb remount
+#    ${PUSH}
+#    if [ $? -eq 0 ];then
+#        echo "--------push succeed--------"
+#    else
+#        exit 1
+#    fi
+elif adb shell setprop ro.debuggable 1;then
+    echo "!!!!!!!!!!!!"
+    adb root
     adb wait-for-device
     adb remount
     ${PUSH}
-    echo "--------push succeed--------"
+    if [ $? -eq 0 ];then
+        echo "--------push succeed------"
+    else
+        exit 1
+    fi
 else
     echo "--------can not root--------"
+    exit 1
 fi
 
-if [ ${needReboot} -eq 0 ];then
-    echo "--------rebootfaking--------"
-    rebootfake
-fi
+#if [ ${needReboot} -eq 0 ];then
+#    echo "--------rebootfaking--------"
+#rebootfake
+#    sleep 1
+#    rebootfake
+#fi
