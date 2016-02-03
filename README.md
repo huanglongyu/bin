@@ -31,3 +31,6 @@ output :
 
 BTW : this do not support for recovery/boot.img and needs root permission
 
+##killTarget :
+killTarget systemui/settings
+
