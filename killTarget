@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #adb shell kill -9 `adb shell ps | grep $1 | awk '{print $2}' `
 FILENAME=temp.ps
 adb shell ps | grep -i $1 > ${FILENAME}
@@ -7,9 +7,11 @@ if [ ${LINE} -eq 1 ] ;then
    echo "killing process: `awk '{print $9}' ${FILENAME}`"
    adb shell kill -9 `awk '{print $2}' ${FILENAME}`
 else
-   awk 'BEGIN{print "which process would be killed?"}
-             {print NR,$0}' ${FILENAME}
-   echo -n "[num]:"
+   echo -e "\033[34;49;1mwhich process would be killed? \033[39;49;0m"
+#   awk 'BEGIN{print "which process would be killed?"}
+#             {print NR,$0}' ${FILENAME}
+   awk '{print NR,$0}' ${FILENAME}
+   echo -ne "\033[35;49;1m[num]: \033[39;49;0m"
    read NUM
    TARGETLINE=`sed -n ${NUM}p ${FILENAME}`
    echo "killiing process: `echo ${TARGETLINE} | awk '{print $9}'`"
