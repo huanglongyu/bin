@@ -1,0 +1,2 @@
+#!/bin/sh
+/home/hly/bin/p4v-2015.2.1315639/bin/p4merge $*

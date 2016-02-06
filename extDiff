@@ -1,0 +1,3 @@
+#!/bin/sh
+#[ $# -eq 7 ] && /home/hly/bin/extMerge "$2" "$5"
+/home/hly/bin/extMerge "$2" "$3"
