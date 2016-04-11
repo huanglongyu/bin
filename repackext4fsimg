@@ -1,0 +1,22 @@
+#!/bin/bash
+
+SRC_DIR=$1
+SIZE=$2
+ENABLE_SPARSE_IMAGE=$3
+
+MOUNT_POINT=${SRC_DIR}
+OUTPUT_FILE=repack.$1.img
+
+if [ "${ENABLE_SPARSE_IMAGE}" != "nos" ];then
+    echo "---enable sparse image---"
+    make_ext4fs -s -l $SIZE -a $MOUNT_POINT $OUTPUT_FILE $SRC_DIR
+else
+    echo "---not enable sparse image---"
+    make_ext4fs -l $SIZE -a $MOUNT_POINT $OUTPUT_FILE $SRC_DIR
+fi
+
+if [ $? -eq 0 ];then
+    echo "---------success--------"
+else
+    echo "---------failed--------"
+fi
