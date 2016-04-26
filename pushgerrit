@@ -1,2 +1,59 @@
-#!/bin/sh
-git push origin HEAD:refs/for/$1
+#!/bin/bash
+
+                        ########################
+                        #                      #
+                        # @author:longyu.huang #
+                        #                      #
+                        # @date : 4/25/16      #
+                        #                      #
+                        ########################
+
+typeset -i NUM
+typeset -i INDEX
+
+#
+#  if u want more reviewer,modify the variable like below
+#      reviewer=san.zhang@ck-telecom.com, r=xxxx@ck-telecom.com
+#
+reviewer=xiaoping.chen@ck-telecom.com
+
+if [ -z ${reviewer} ] ;then
+    echo -e "\033[31merror:\033[0m edit the script to setup the reviewer first"
+    exit 1;
+fi
+
+ALL_BRANCH_LOCAL=$(ls .git/refs/heads 2>/dev/null)
+if [ $? -ne 0 ];then
+    echo -e "\033[31merror:\033[0m do not find the .git directory"
+    exit 1;
+fi
+HEAD=`git describe --contains --all HEAD`
+
+array=(${ALL_BRANCH_LOCAL// / })
+
+for index in "${!array[@]}"
+do
+    INDEX=${index}+1
+    if [ ${HEAD} = ${array[index]} ];then
+        echo -e "* \033[32;5m${INDEX}.${HEAD} \033[37;0m"
+    else
+        echo "  $INDEX.${array[index]}"
+    fi
+done
+
+echo -ne "\033[35;49;1mPush Current branch to: \033[39;49;0m"
+read NUM
+
+NUM2=$((NUM-1))
+if [ "${NUM2}" -lt 0 ];then
+    TARGET=
+else
+    TARGET=${array[${NUM2}]}
+fi
+
+if [ -z "${TARGET}" ];then
+    echo -e "\033[31merror:\033[0m ${NUM} is not point to any branch"
+else
+    git push origin HEAD:refs/for/${TARGET}%r=${reviewer}
+
+fi
